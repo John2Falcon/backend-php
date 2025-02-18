@@ -44,14 +44,24 @@ try {
             "data" => $result
         ]);
     }
-    elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['news'])) {
-        // Endpoint: GET /api.php?news
-        $result = $newsController->getNews();
-        echo json_encode([
-            "success" => true,
-            "data" => $result
-        ]);
+elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['news'])) {
+    // Obtener el criterio de orden (por defecto: pub_date)
+    $orderBy = isset($_GET['orderBy']) ? $_GET['orderBy'] : 'pub_date';
+
+    // Lista de columnas válidas para evitar SQL Injection
+    $allowedColumns = ['pub_date', 'title', 'feed_id'];
+    if (!in_array($orderBy, $allowedColumns)) {
+        $orderBy = 'pub_date'; // Si el parámetro no es válido, usar el predeterminado
     }
+
+    // Llamar al controlador con el criterio de ordenación
+    $result = $newsController->getNews($orderBy);
+    echo json_encode([
+        "success" => true,
+        "data" => $result
+    ]);
+}
+
     else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['feeds'])) {
         // Obtener y loggear datos del body
         $rawData = file_get_contents("php://input");
